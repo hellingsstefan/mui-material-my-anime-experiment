@@ -4,20 +4,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Grid from '@mui/material/Unstable_Grid2';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-
-/*  Todo:
-    Create a page where a list of different Anime is shown using cards
-    Each card represents an anime and should have an image on the left, title on the right, and a link to the latest episode of that anime underneath the title
-    The list of anime should be fetched from the Jikan API
-
-    The page should be responsive and should look good on mobile devices
-    The page should be styled using Material UI
-*/
+import Media from '@/components/Media';
 
 const jikanBaseUrl = 'https://api.jikan.moe/';
 const version = 'v4';
@@ -27,6 +14,8 @@ const endpoints = {
     top: '/top/anime',
     search: '/anime',
 };
+
+const topLimit = 25;
 
 export async function getStaticProps() {
     const res = await fetch(`${API}${endpoints.top}`);
@@ -40,6 +29,7 @@ export async function getStaticProps() {
 }
 
 export default function Home({ top }) {
+
     const animeList = top.data.map(({ mal_id, title, title_japanese, images, episodes }) => ({
         id: mal_id,
         title,
@@ -47,6 +37,8 @@ export default function Home({ top }) {
         image: images.webp.image_url,
         nrOfEpisodes: episodes,
     })) || [];
+
+    const bookmarkedList = animeList.filter(({ id }) => isBookmarked(id)) || [];
 
     return (
         <>
@@ -67,36 +59,45 @@ export default function Home({ top }) {
                             expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel1a-content"
                             id="panel1a-header"
+                            sx={{
+                                backgroundColor: 'dark',
+                            }}
                         >
-                            <Typography variant="h2" component="h2" gutterBottom>
+                            <Typography variant="h6">
                                 Top Anime
                             </Typography>
                         </AccordionSummary>
+
                         <AccordionDetails>
-                            <Grid container spacing={2}>
-                                {animeList.map(({ title, image, nrOfEpisodes }, index) => (
-                                    <Grid key={index} xs={6}>
-                                        <Card sx={{ display: 'flex' }}>
-                                            <CardMedia
-                                                component="img"
-                                                sx={{ width: 150 }}
-                                                image={ image }
-                                                alt={ title }
-                                            />
-                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                <CardContent>
-                                                    <Typography component="div" gutterBottom>
-                                                        { title }
-                                                    </Typography>
-                                                    <Typography component="p" gutterBottom>
-                                                        { nrOfEpisodes } episodes
-                                                    </Typography>
-                                                </CardContent>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
+                            <Media
+                                data={animeList}
+                                loading={false}
+                                limit={topLimit}
+                                toggleBookmark={toggleBookmark}
+                            />
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                            sx={{
+                                backgroundColor: 'dark',
+                            }}
+                        >
+                            <Typography variant="h6">
+                                Bookmarked
+                            </Typography>
+                        </AccordionSummary>
+
+                        <AccordionDetails>
+                            <Media
+                                data={bookmarkedList}
+                                loading={false}
+                                limit={topLimit}
+                            />
                         </AccordionDetails>
                     </Accordion>
                 </Container>
