@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { Container, Typography } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
@@ -9,36 +10,54 @@ import Media from '@/components/Media';
 const jikanBaseUrl = 'https://api.jikan.moe/';
 const version = 'v4';
 const API = `${jikanBaseUrl}${version}`;
-
+const topLimit = 25;
 const endpoints = {
     top: '/top/anime',
     search: '/anime',
 };
 
-const topLimit = 25;
+const getAnimeList = data => data.map(item => ({
+    id: item.mal_id,
+    title: item.title,
+    title_japanese: item.title_japanese,
+    image: item.images.webp.image_url,
+    nrOfEpisodes: item.episodes,
+    bookmarked: false,
+})) || [];
 
-export async function getStaticProps() {
-    const res = await fetch(`${API}${endpoints.top}`);
-    const top = await res.json();
+export default function Home() {
+    const [ animeList, setAnimeList ] = useState([]);
+    const [ pagination, setPagination ] = useState({});
+    const [ isLoading, setLoading ] = useState(false);
+    const [ expanded, setExpanded ] = useState('panel1');
 
-    return {
-        props: {
-            top,
-        },
+    useEffect(() => {
+        /* fetch data */
+        setLoading(true);
+        fetch(`${API}${endpoints.top}`)
+            .then((res) => res.json())
+            .then((data) => {
+                setAnimeList(getAnimeList(data.data));
+                setPagination(data.pagination);
+                setLoading(false);
+            });
+
+    }, []);
+
+    const toggleBookmark = id => {
+        const items = [ ...animeList ];
+        const item = items.find(item => item.id === id);
+
+        item.bookmarked = !item.bookmarked;
+
+        setAnimeList(items);
     };
-}
 
-export default function Home({ top }) {
+    const bookmarkedList = animeList.filter(item => item.bookmarked);
 
-    const animeList = top.data.map(({ mal_id, title, title_japanese, images, episodes }) => ({
-        id: mal_id,
-        title,
-        title_japanese,
-        image: images.webp.image_url,
-        nrOfEpisodes: episodes,
-    })) || [];
-
-    const bookmarkedList = animeList.filter(({ id }) => isBookmarked(id)) || [];
+    const handleChange = (panel) => (event, newExpanded) => {
+        setExpanded(newExpanded ? panel : false);
+    };
 
     return (
         <>
@@ -54,7 +73,7 @@ export default function Home({ top }) {
                         My Anime
                     </Typography>
 
-                    <Accordion>
+                    <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel1a-content"
@@ -71,18 +90,18 @@ export default function Home({ top }) {
                         <AccordionDetails>
                             <Media
                                 data={animeList}
-                                loading={false}
+                                loading={isLoading}
                                 limit={topLimit}
                                 toggleBookmark={toggleBookmark}
                             />
                         </AccordionDetails>
                     </Accordion>
 
-                    <Accordion>
+                    <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1a-content"
-                            id="panel1a-header"
+                            aria-controls="panel2a-content"
+                            id="panel2a-header"
                             sx={{
                                 backgroundColor: 'dark',
                             }}
@@ -97,6 +116,7 @@ export default function Home({ top }) {
                                 data={bookmarkedList}
                                 loading={false}
                                 limit={topLimit}
+                                toggleBookmark={toggleBookmark}
                             />
                         </AccordionDetails>
                     </Accordion>
