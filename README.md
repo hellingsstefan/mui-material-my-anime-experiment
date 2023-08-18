@@ -5,7 +5,7 @@ API data comes from [jikan.moe](https://api.jikan.moe/).
 
 currently looks like this:
 
-![image](https://raw.githubusercontent.com/hellingsstefan/mui-material-my-anime-experiment/main/my-anime-experiment.png)
+![image](https://github.com/hellingsstefan/mui-material-my-anime-experiment/blob/9ce975f00dc324c5e52be8394de81b5009ffb2d2/my-anime-experiment.png?raw=true)
 
 
 ## Default readme:
