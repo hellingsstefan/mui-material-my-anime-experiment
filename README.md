@@ -1,3 +1,16 @@
+# Material UI experiment:
+This project is a Material UI experiment. It is a Next.js project where I played a bit with Material UI and Next.js.
+
+API data comes from [jikan.moe](https://api.jikan.moe/).
+
+currently looks like this:
+
+![image](https://raw.githubusercontent.com/hellingsstefan/mui-material-my-anime-experiment/main/my-anime-experiment.png)
+
+
+## Default readme:
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
